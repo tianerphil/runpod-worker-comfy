@@ -1,0 +1,44 @@
+I have customized this worker docker config in these steps:
+
+
+For local run
+clone the repo in vscode
+   git clone from https://github.com/blib-la/runpod-worker-comfy.git
+
+create venv using python3.10
+    python3.10 -m venv venv
+change vscode python interpreter to the venv python interpreter
+
+close and reopen the vscode termial with venv activiated
+
+install the requirements
+    pip install -r requirements.txt 
+
+
+For dockerfile config and start.sh
+2. customized the dockerfile and src/start.sh so that it will link to the network volume and run from it, no need to install the comfy and custome nodes anynore
+   2.1 in the dockerfile I have disabled all the comfy installation and custom nodes installation
+   2.2 in the src/start.sh I have created a symbol link from the defualt docker mount point /runpod-volume to the network volume /workspace
+   2.3 in the src/start.sh run the comfy in the venv where all the dependancy are installed, change the log dir to /workspace/ComfyUI/log/comfyui.log
+   2.4 deactivate the venv and run the rp_handler.py outside of the venv where the runpod dependancy is installed (did it in the dockerfile)
+3. update the runpod serverless tamplate add a env variable, rp_handler.py will read this and put the output into here
+    COMFY_OUTPUT_PATH = /workspace/ComfyUI/output
+
+
+Build docker
+
+   docker build -t liangzhang80/runpod-worker-comfy:dev2 --platform linux/amd64 .
+   docker push liangzhang80/runpod-worker-comfy:dev2
+
+Create serverless endpoint
+   
+   follow the instruction, just remember to add COMFY_OUTPUT_PATH = /workspace/ComfyUI/output in the template
+
+Debug the serverless
+   start the serverless endpoint
+   local machine make sure venv and vscode python interpreter is correct
+   update .env api-key and endpoint ID
+   cd assess-test/
+   python custom.py
+   keep one worker as active logon from web terminal
+   tail -f /workspace/ComfyUI/log/comfyui.log

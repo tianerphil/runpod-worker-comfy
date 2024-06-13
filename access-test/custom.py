@@ -1,4 +1,10 @@
-{
+#!/usr/bin/env python3
+from util import post_request
+import random
+
+
+if __name__ == '__main__':
+    payload = {
   "input": {
     "workflow": {
       "3": {
@@ -61,3 +67,8 @@
     }
   }
 }
+
+
+    payload["input"]["workflow"]["3"]["inputs"]["seed"] = random.randrange(1, 1000000)
+
+    post_request(payload)
