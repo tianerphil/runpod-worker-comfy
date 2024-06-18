@@ -27,5 +27,5 @@ else
     deactivate
 
     echo "runpod-worker-comfy: Starting RunPod Handler outside of VENV"
-    python -u /rp_handler.py
+    python -u /rp_handler.py > /workspace/ComfyUI/log/rp_handler.log 2>&1
 fi

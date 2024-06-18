@@ -1,7 +1,7 @@
 I have customized this worker docker config in these steps:
 
 
-For local run
+For local run:
 clone the repo in vscode
    git clone from https://github.com/blib-la/runpod-worker-comfy.git
 
@@ -16,11 +16,12 @@ install the requirements
 
 
 For dockerfile config and start.sh
-2. customized the dockerfile and src/start.sh so that it will link to the network volume and run from it, no need to install the comfy and custome nodes anynore
+2. customized the dockerfile and src/start.sh so that it will link to the network volume and run from it, no need to install the comfy and custome nodes anymore
    2.1 in the dockerfile I have disabled all the comfy installation and custom nodes installation
    2.2 in the src/start.sh I have created a symbol link from the defualt docker mount point /runpod-volume to the network volume /workspace
    2.3 in the src/start.sh run the comfy in the venv where all the dependancy are installed, change the log dir to /workspace/ComfyUI/log/comfyui.log
-   2.4 deactivate the venv and run the rp_handler.py outside of the venv where the runpod dependancy is installed (did it in the dockerfile)
+   2.4 deactivate the venv and run the rp_handler.py outside of the venv where the runpod dependancy is installed, and direct the log into /workspace/ComfyUI/log/rp_handler.log
+   2.5 revised the rp_handler.process_output_images function to return the generated images as a list
 3. update the runpod serverless tamplate add a env variable, rp_handler.py will read this and put the output into here
     COMFY_OUTPUT_PATH = /workspace/ComfyUI/output
 
@@ -33,12 +34,33 @@ Build docker
 Create serverless endpoint
    
    follow the instruction, just remember to add COMFY_OUTPUT_PATH = /workspace/ComfyUI/output in the template
+   and mount network volume in the runpod config page
 
 Debug the serverless
    start the serverless endpoint
    local machine make sure venv and vscode python interpreter is correct
    update .env api-key and endpoint ID
    cd assess-test/
-   python custom.py
+   python app-i2i.py
    keep one worker as active logon from web terminal
    tail -f /workspace/ComfyUI/log/comfyui.log
+   another logon from web termial
+   tail -f /workspace/ComfyUI/log/rp_handler.log
+
+
+
+
+To update a new workflow 
+
+1. export the new workflow and save it under client-access folder
+2. idendify the 
+      self.load_image_node_number
+      self.seed_node_number
+      self.positive_prompt_node_number
+      self.output_node_number
+      update all of these numbers in the code
+3. update .env the workflow template name
+4. update .env serverless id
+5. run the serverless endpoint
+6. open the two logs to monitor
+7. run the app-i2i.py from local machine in sync mode to access the server

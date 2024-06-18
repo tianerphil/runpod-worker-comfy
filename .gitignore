@@ -5,3 +5,9 @@ data
 models
 simulated_uploaded
 __pycache__
+input
+output
+log.*
+DEBUG
+*.pyc
+flagged

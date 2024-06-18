@@ -12,6 +12,18 @@ from src import rp_handler
 # Local folder for test resources
 RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES = "./test_resources/images"
 
+def _summarize_dict(d, max_length=20):
+    def _summarize(value):
+        if isinstance(value, dict):
+            return {k: _summarize(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            return [_summarize(v) for v in value]
+        elif isinstance(value, str) and len(value) > max_length:
+            return f"<str(len={len(value)})>"
+        else:
+            return value
+
+    return _summarize(d)
 
 class TestRunpodWorkerComfy(unittest.TestCase):
     def test_valid_input_with_workflow_only(self):
@@ -232,3 +244,45 @@ class TestRunpodWorkerComfy(unittest.TestCase):
 
         self.assertEqual(len(responses), 3)
         self.assertEqual(responses["status"], "error")
+    
+    @patch("rp_handler.os.path.exists")
+    @patch("rp_handler.base64_encode")
+    @patch.dict(
+        os.environ, {"COMFY_OUTPUT_PATH": RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES, "BUCKET_ENDPOINT_URL": ""}
+    )
+    def test_process_output_images_multiple_images_no_bucket(self, mock_base64_encode, mock_exists):
+        # Mock the os.path.exists to return True, simulating that the images exist
+        mock_exists.return_value = True
+        
+        # Mock the base64_encode to return a simulated base64 string
+        mock_base64_encode.side_effect = [
+            "base64encodedimage1",
+            "base64encodedimage2",
+            "base64encodedimage3",
+            "base64encodedimage4"
+        ]
+        
+        # Define the outputs and job_id for the test
+        outputs = {
+            "node_id_1": {"images": [{"filename": "ComfyUI_00001_.png", "subfolder": "test"}]},
+            "node_id_2": {"images": [{"filename": "ComfyUI_00002_.png", "subfolder": "test"}]},
+            "node_id_3": {"images": [{"filename": "ComfyUI_00003_.png", "subfolder": "test"}]},
+            "node_id_4": {"images": [{"filename": "ComfyUI_00004_.png", "subfolder": "test"}]}
+        }
+        job_id = "123"
+        
+        # Call the function under test
+        result = rp_handler.process_output_images(outputs, job_id)
+        print(f"result: {_summarize_dict(result)}")
+        # Assertions
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(len(result["message"]), 4)
+        # self.assertIn("base64encodedimage1", result["message"])
+        # self.assertIn("base64encodedimage2", result["message"])
+        # self.assertIn("base64encodedimage3", result["message"])
+        # self.assertIn("base64encodedimage4", result["message"])
+
+        # mock_base64_encode.assert_any_call("./test_resources/images/test/ComfyUI_00001_.png")
+        # mock_base64_encode.assert_any_call("./test_resources/images/test/ComfyUI_00002_.png")
+        # mock_base64_encode.assert_any_call("./test_resources/images/test/ComfyUI_00003_.png")
+        # mock_base64_encode.assert_any_call("./test_resources/images/test/ComfyUI_00004_.png")
