@@ -31,7 +31,7 @@
   },
   "64": {
     "inputs": {
-      "ckpt_name": "dreamshaper_8.safetensors"
+      "ckpt_name": "majicmixRealistic_v7.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {

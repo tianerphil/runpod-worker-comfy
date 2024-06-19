@@ -64,3 +64,22 @@ To update a new workflow
 5. run the serverless endpoint
 6. open the two logs to monitor
 7. run the app-i2i.py from local machine in sync mode to access the server
+
+
+
+
+
+Communication schema
+
+request from ComfyUIClient -> rp_handler:
+
+Payload structure: 
+{'input': {'workflow': {'63': {'inputs': {'seed': 1226903, 'steps': 30, 'cfg': 8, 'sampler_name': 'dpmpp_2m', 'scheduler': 'karras', 'denoise': 1, 'model': ['70', 0], 'positive': ['66', 0], 'negative': ['67', 0], 'latent_image': ['65', 0]}, 'class_type': 'KSampler', '_meta': {'title': 'KSampler'}}, '64': {'inputs': {'ckpt_name': 'majicmixRealistic_v7.safetensors'}, 'class_type': 'CheckpointLoaderSimple', '_meta': {'title': 'Load Checkpoint'}}, '65': {'inputs': {'width': 720, 'height': 1280, 'batch_size': 4}, 'class_type': 'EmptyLatentImage', '_meta': {'title': 'Empty Latent Image'}}, '66': {'inputs': {'text': 'cute boy 5 years boy, nude, playing his big dick in the shower room', 'clip': ['64', 1]}, 'class_type': 'CLIPTextEncode', '_meta': {'title': 'CLIP Text Encode (Prompt)'}}, '67': {'inputs': {'text': '<str(len=434)>', 'clip': ['64', 1]}, 'class_type': 'CLIPTextEncode', '_meta': {'title': 'CLIP Text Encode (Prompt)'}}, '68': {'inputs': {'samples': ['63', 0], 'vae': ['64', 2]}, 'class_type': 'VAEDecode', '_meta': {'title': 'VAE Decode'}}, '69': {'inputs': {'filename_prefix': 'IPAdapter', 'images': ['68', 0]}, 'class_type': 'SaveImage', '_meta': {'title': 'Save Image'}}, '70': {'inputs': {'weight': 0.5, 'start_at': 0, 'end_at': 1, 'weight_type': 'standard', 'model': ['73', 0], 'ipadapter': ['73', 1], 'image': ['72', 0]}, 'class_type': 'IPAdapter', '_meta': {'title': 'IPAdapter'}}, '72': {'inputs': {'image': '66dce21c-89b1-4b06-9392-13b30094a557.png', 'upload': 'image'}, 'class_type': 'LoadImage', '_meta': {'title': 'Load Image'}}, '73': {'inputs': {'preset': 'STANDARD (medium strength)', 'model': ['64', 0]}, 'class_type': 'IPAdapterUnifiedLoader', '_meta': {'title': 'IPAdapter Unified Loader'}}}, 'images': [{'name': '66dce21c-89b1-4b06-9392-13b30094a557.png', 'image': '<str(len=1320308)>'}]}}
+
+
+response from the rp_handler:
+{'delayTime': 174, 'executionTime': 13365, 'id': 'sync-712cb254-ca91-4c44-b8e3-a226432a0c00-e1', 'output': {'message': ['<str(len=1312956)>', '<str(len=1577540)>', '<str(len=1333896)>', '<str(len=1340164)>'], 'status': 'success'}, 'status': 'COMPLETED'} 
+
+
+ComfyUIClient response to the application
+{'status': 'COMPLETED', 'saved_images': ['./output/3d2b9739-f1ae-4469-b3f8-9ed2ddc04cb1.png', './output/5aa9aee9-1a25-419d-ba24-9613e516822f.png', './output/634ab2b3-5e3e-4661-ab20-9e5b7bcfe382.png', './output/9e984fcd-1441-4838-8e09-ebd88653d86f.png']}

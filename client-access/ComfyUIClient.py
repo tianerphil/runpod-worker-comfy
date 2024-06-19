@@ -37,7 +37,7 @@ class Timer:
 
 
 class ComfyUIClient:
-    def __init__(self, endpoint_url, api_key, endpoint_id, input_dir, output_dir):
+    def __init__(self, endpoint_url, api_key, endpoint_id, output_dir, input_dir=None):
         self.endpoint_url = endpoint_url
         self.api_key = api_key
         self.endpoint_id = endpoint_id
@@ -64,14 +64,14 @@ class ComfyUIClient:
 
         return _summarize(d)
 
-    def load_workflow(self, filepath, load_image_node_number, seed_node_number, positive_prompt_node_number, output_node_number):
+    def load_workflow(self, filepath, seed_node_number, positive_prompt_node_number, output_node_number, load_image_node_number=None):
         try:
             with open(filepath, 'r') as f:
                 self.workflow = json.load(f)
-            self.load_image_node_number = load_image_node_number
             self.seed_node_number = seed_node_number
             self.positive_prompt_node_number = positive_prompt_node_number
             self.output_node_number = output_node_number
+            self.load_image_node_number = load_image_node_number
             self.payload = {
                 "input": {
                     "workflow": self.workflow
