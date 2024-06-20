@@ -145,7 +145,7 @@ class ComfyUIClient:
             logging.error(f"Error saving result images: {e}")
             raise
 
-    def handle_response(self, resp_json):
+    def handle_response(self, resp_json, timer=None):
         """
         get the input message schema, save as local file and return the output schema
 
@@ -164,23 +164,35 @@ class ComfyUIClient:
         {"status": "COMPLETED", "saved_images": [saved_image_path1, saved_image_path2, ...]}
         
         """
-        if resp_json['output'] is not None and 'message' in resp_json['output']:
-            images = resp_json['output']['message']
-            if not isinstance(images, list):
-                images = [images]
-            saved_image_paths = []
-            for image in images:
-                img = Image.open(BytesIO(base64.b64decode(image)))
-                file_extension = 'jpeg' if img.format == 'JPEG' else 'png'
-                output_file = os.path.join(self.output_dir, f'{uuid.uuid4()}.{file_extension}')
-                with open(output_file, 'wb') as f:
-                    logging.debug(f'Saving image: {output_file}')
-                    img.save(f, format=img.format)
-                saved_image_paths.append(output_file)
-            return {"status": "COMPLETED", "saved_images": saved_image_paths}
-        else:
-            logging.error("Invalid response format: %s", resp_json)
-            raise ValueError("Invalid response format")
+        try:
+            if resp_json['output'] is not None and 'message' in resp_json['output']:
+                images = resp_json['output']['message']
+                if not isinstance(images, list):
+                    images = [images]
+                saved_image_paths = []
+                for image in images:
+                    img = Image.open(BytesIO(base64.b64decode(image)))
+                    file_extension = 'jpeg' if img.format == 'JPEG' else 'png'
+                    output_file = os.path.join(self.output_dir, f'{uuid.uuid4()}.{file_extension}')
+                    with open(output_file, 'wb') as f:
+                        logging.debug(f'Saving image: {output_file}')
+                        img.save(f, format=img.format)
+                    saved_image_paths.append(output_file)
+                
+                if timer is not None:
+                    processing_time = timer.get_elapsed_time()
+                    logging.debug(f'Processing time: {processing_time:.2f} seconds')
+                
+                return {"status": "COMPLETED", "saved_images": saved_image_paths}
+            else:
+                logging.error("Invalid response format: %s", resp_json)
+                raise ValueError("Invalid response format")
+        except Exception as e:
+            if timer is not None:
+                processing_time = timer.get_elapsed_time()
+                logging.debug(f'Processing time: {processing_time:.2f} seconds')
+            logging.error("An error occurred: %s", e)
+            raise
         
     def post_request(self, run_sync=True):
         """
@@ -231,7 +243,7 @@ class ComfyUIClient:
                 resp_json = response.json()
                 logging.debug("Response JSON: %s", self._summarize_dict(resp_json))
                 if 'output' in resp_json:
-                    return self.handle_response(resp_json)
+                    return self.handle_response(resp_json, timer)
                 else:
                     return self.poll_for_completion(resp_json['id'], timer)
             else:

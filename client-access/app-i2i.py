@@ -49,7 +49,7 @@ def image_generate_image(local_image, prompt_text):
         copyfile(local_image, input_image_path)
         logging.debug("Saved input image to %s", input_image_path)
         
-        # Upload the image
+        # Upload the image to the workflow payload, and update the workflow nodes file name
         logging.debug("Uploading image...")
         image_data = client.upload_image(input_image_path)
         logging.debug("Encoded image data: %s", image_data[:50])  # Log the beginning of the base64 string for debugging
@@ -63,7 +63,8 @@ def image_generate_image(local_image, prompt_text):
         logging.debug("Positive prompt node updated.")
 
         logging.debug("Requesting images synchronously...")
-        response = client.queue_prompt_sync()
+        #response = client.queue_prompt_sync()
+        response = client.queue_prompt_async()
         
         logging.debug("Images generated successfully.")
 

@@ -1,0 +1,29 @@
+# cited from the blog here https://trapdoor.cloud/getting-started-with-runpod-serverless/
+
+
+
+Local Testing
+It is useful to test your Serverless Handler code locally before deploying it to RunPod. You can do this by creating a file called test_input.json with a body that looks like this:
+
+{
+    "input": {
+        "name": "Ashley"
+    }
+}
+You can then create a Python virtual environment and install the runpod module as follows:
+
+python3 -m venv venv
+source venv/bin/activate
+pip3 install runpod
+Once the runpod module is installed, you can test your handler locally as follows:
+
+python3 -u rp_handler.py
+This will return an output that looks similar to the following:
+
+WARN   | RUNPOD_WEBHOOK_GET_JOB not set, switching to get_local
+INFO   | local_test | Started
+WARN   | Local test job results for local_test: {"output": {"greeting": "Hello Ashley"}}
+INFO   | local_test | Finished
+INFO   | Local testing complete, exiting.
+Once you are happy with the results of your local testing, you are ready to deploy your application to RunPod Serverless. This will require you to build a Docker image containing your application code using a Dockerfile.
+
