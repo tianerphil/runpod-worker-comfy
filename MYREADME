@@ -60,10 +60,12 @@ To update a new workflow
       self.output_node_number
       update all of these numbers in the code
 3. update .env the workflow template name
-4. update .env serverless id
+4. update .env serverless id, and key
 5. run the serverless endpoint
 6. open the two logs to monitor
 7. run the app-i2i.py from local machine in sync mode to access the server
+   python app-i2i.py
+8. browser visit localhost:7860
 
 
 
